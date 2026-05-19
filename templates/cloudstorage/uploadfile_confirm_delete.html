@@ -1,0 +1,15 @@
+{% extends "inner_base.html" %}
+{% load static %}
+{% block content %}
+<div class="row">
+    <div class="12u">
+        <h2>Delete File</h2>
+    </div>
+    <div class="12u">
+        <form action="" method="post">{% csrf_token %}
+            <p>Are you sure you want to delete "{{ object }}"?</p>
+            <input type="submit" value="Confirm" class="button" />
+        </form>
+    </div>
+</div>
+{% endblock %}

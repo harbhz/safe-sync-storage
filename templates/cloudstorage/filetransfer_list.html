@@ -1,0 +1,76 @@
+{% extends "inner_base.html" %}
+{% load static %}
+{% block content %}
+<style>
+  .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold; }
+  .badge-low    { background:#c8f7c5; color:#1e6b1e; }
+  .badge-medium { background:#fef3cd; color:#856404; }
+  .badge-high   { background:#f8d7da; color:#842029; }
+  .badge-expired { background:#e2e3e5; color:#6c757d; }
+  .row-expired td { opacity: 0.55; }
+  .btn-disabled { pointer-events:none; opacity:0.4; }
+</style>
+
+<div class="row">
+  <div class="10u">
+    <h2>Transfer File List</h2>
+  </div>
+  <div class="2u">
+    <a href="/filetransfer/" class="button" style="float:right">Transfer File</a>
+  </div>
+  <div class="12u">
+    <table>
+      <tr>
+        <td align="center"><strong>Sender</strong></td>
+        <td align="center"><strong>File</strong></td>
+        <td align="center"><strong>Sensitivity</strong></td>
+        <td align="center"><strong>Remarks</strong></td>
+        <td align="center"><strong>Receiver</strong></td>
+        <td align="center"><strong>Expires</strong></td>
+        <td align="center"><strong>Download</strong></td>
+      </tr>
+
+      {% for transfer_file in object_list %}
+        <tr {% if transfer_file.is_expired %}class="row-expired"{% endif %}>
+          <td align="center">{{ transfer_file.user }}</td>
+          <td align="center">{{ transfer_file.file_name }}</td>
+          <td align="center">
+            <span class="badge badge-{{ transfer_file.file_name.sensitivity }}">
+              {{ transfer_file.file_name.sensitivity|upper }}
+            </span>
+          </td>
+          <td align="center">{{ transfer_file.remarks }}</td>
+          <td align="center">{{ transfer_file.receiver_user }}</td>
+          <td align="center" style="font-size:12px;">
+            {% if transfer_file.expires_at %}
+              {% if transfer_file.is_expired %}
+                <span class="badge badge-expired">EXPIRED</span><br/>
+                <small>{{ transfer_file.expires_at|date:"d M Y H:i" }} UTC</small>
+              {% else %}
+                {{ transfer_file.expires_at|date:"d M Y H:i" }} UTC
+              {% endif %}
+            {% else %}
+              &mdash;
+            {% endif %}
+          </td>
+          <td align="center">
+            {% if transfer_file.is_expired %}
+              <a class="button btn-disabled"
+                 style="height:34px;font-size:12px;background:#aaa;"
+                 title="Share link has expired">Expired</a>
+            {% else %}
+              <a href="/downloadfile/{{ transfer_file.file_name.id }}"
+                 target="_blank" class="button"
+                 style="height:34px;font-size:12px;">Download</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="7">No transfers yet.</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

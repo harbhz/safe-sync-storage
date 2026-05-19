@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<section id="banner" style="height: 250px;padding-top:100px!important;">
+  <h2 style="margin-top: 50px;">Security Question Verification</h2>
+</section>
+<section id="one" class="wrapper style2">
+  <div class="container">
+    <div class="row">
+      <div class="2u">&nbsp;</div>
+      <div class="8u">
+        {% if messages %}
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        {% endif %}
+        <p>Please answer your security question to continue.</p>
+        <div style="margin: 10px 0;">
+          <strong>{{ security_question }}</strong>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="button">Verify</button>
+        </form>
+      </div>
+      <div class="2u">&nbsp;</div>
+    </div>
+  </div>
+</section>
+{% endblock %}

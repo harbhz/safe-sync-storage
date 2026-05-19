@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<!-- Banner -->
+    <section id="banner">
+        <h2>SafeSync Storage- Encrypted Data Synchronization on Cloud </h2>
+        <p>Free Data Storage Tool on Cloud</p>
+        <ul class="actions">
+            <li>
+                {% if user.is_authenticated %}
+                    <a href="/profile/" class="button big">My Account</a>
+                {% else %}
+                    <a href="/register/" class="button big">Register Now</a>
+                {% endif %}
+            </li>
+        </ul>
+    </section>
+
+
+    <section id="two" class="wrapper style2 align-center">
+        <div class="container">
+            <header>
+                <h2>About the project</h2>
+                <p>
+                    As cloud adoption continues to grow rapidly at the enterprise level, IT and security departments must provide for secure use of cloud storage and services.
+                    In computer science, Secure Data Storage refers to the store of data such as confidential or proprietary information over a secure channel. Many secure data storage over cloud methods require a type of encryption.
+                </p>
+                <p>
+                    While cloud storage is convenient and gives employees access to their data anywhere, at any time, on nearly any device, cloud storage security is a top concern for organizations’ IT and security departments. The benefits brought by cloud storage – from scalability and accessibility to decreased IT overhead – are driving rapid adoption at enterprises around the world, and there are steps that companies should take to improve cloud storage security and keep sensitive data safe and secure in the cloud.
+                    We have developed <strong>SafeSync Storage- Encrypted Data Synchronization on Cloud</strong> web application using Python, Django and Mysql Technologies Using AES Encryption algorithm.
+                </p>
+            </header>
+        </div>
+    </section>
+{% endblock %}

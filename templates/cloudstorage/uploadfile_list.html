@@ -1,0 +1,58 @@
+{% extends "inner_base.html" %}
+{% load static %}
+{% block content %}
+<style>
+  .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold; }
+  .badge-low    { background:#c8f7c5; color:#1e6b1e; }
+  .badge-medium { background:#fef3cd; color:#856404; }
+  .badge-high   { background:#f8d7da; color:#842029; }
+</style>
+<div class="row">
+    <div class="10u">
+        <h2>File List</h2>
+    </div>
+    <div class="2u">
+         <a href="/addfile/" class="button" style="float: right">Upload File</a>
+    </div>
+    <div class="12u" style="min-height:400px;">
+                <table>
+                    <tr>
+                        <td align="center"><strong>File&nbsp;Name</strong></td>
+                        <td align="center"><strong>Sensitivity</strong></td>
+                        <td align="center"><strong>Cipher</strong></td>
+                        <td align="center"><strong>Created</strong></td>
+                        <td align="center"><strong>Download</strong></td>
+                        <td align="center"><strong>Delete</strong></td>
+                    </tr>
+
+                    {% for files in object_list %}
+
+                        <tr>
+                            <td align="center">{{ files.file_name }}</td>
+                            <td align="center">
+                                <span class="badge badge-{{ files.sensitivity }}">{{ files.sensitivity|upper }}</span>
+                                {% if files.require_step_up %}
+                                    <span title="Step-up confirmation required" style="color:#842029;">&nbsp;&#128274;</span>
+                                {% endif %}
+                            </td>
+                            <td align="center" style="font-size:12px;">{{ files.cipher_used }}</td>
+                            <td align="center">{{ files.date_created }}</td>
+                            <td align="center">
+                                <a href="/downloadfile/{{ files.id }}" target="_blank" class="button" style="height:34px;font-size:12px;">Download</a>
+                            </td>
+                            <td align="center">
+                                <a href="/deletefile/{{ files.id }}" class="button" style="height:34px;font-size:12px;background:firebrick;">Delete</a>
+                            </td>
+                        </tr>
+
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">No files yet.</td>
+                        </tr>
+                    {% endfor %}
+
+                    </table>
+                </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<!-- Banner -->
+     <section id="banner" style="height: 250px;padding-top:100px!important;">
+        <h2 style="margin-top: 50px;">Login</h2>
+    </section>
+    <section id="one" class="wrapper style2">
+        <div class="container">
+            <div class="row">
+                <div class="2u">&nbsp;</div>
+                <div class="8u">
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <button type="submit" class="button">Login</button>
+                        </form>
+                </div>
+                <div class="2u">&nbsp;</div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

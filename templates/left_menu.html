@@ -1,0 +1,18 @@
+<div class="left_menu">
+    {% if user.is_authenticated %}
+       <ul>
+            <li><a href="/overview/" class="left_menu_link">Overview</a></li>
+            <li><a href="/profile/" class="left_menu_link">My Account</a></li>
+            <li><a href="/password/" class="left_menu_link">Change Password</a></li>
+            <li><a href="/filelist/" class="left_menu_link">Upload File List</a></li>
+            <li><a href="/addfile/" class="left_menu_link">Upload File</a></li>
+            <li><a href="/filetransfer_list/" class="left_menu_link">File Transfer List</a></li>
+            <li><a href="/filetransfer/" class="left_menu_link">File Transfer</a></li>
+            <li><a href="/chat/" class="left_menu_link">Chat</a></li>
+            <li><a href="/activity-log/" class="left_menu_link">Activity Logs</a></li>
+            <li><a href="/anomaly-dashboard/" class="left_menu_link">Anomaly Dashboard</a></li>
+            <li><a href="/ecc-keys/" class="left_menu_link">ECC Keys</a></li>
+            <li><a href="/logout/" class="left_menu_link">Logout</a></li>
+        </ul>
+    {% endif %}
+</div>

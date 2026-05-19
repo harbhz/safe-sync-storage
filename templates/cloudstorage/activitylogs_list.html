@@ -1,0 +1,53 @@
+{% extends "inner_base.html" %}
+{% load static %}
+{% block content %}
+<style>
+  .act-badge { display:inline-block; padding:2px 8px; border-radius:4px;
+               font-size:11px; font-weight:bold; white-space:nowrap; }
+  .act-Login          { background:#d1ecf1; color:#0c5460; }
+  .act-Logout         { background:#e2e3e5; color:#383d41; }
+  .act-FileUpload     { background:#d4edda; color:#155724; }
+  .act-DeleteFile     { background:#f8d7da; color:#842029; }
+  .act-FileTransfer   { background:#cce5ff; color:#004085; }
+  .act-UpdateProfile  { background:#fff3cd; color:#856404; }
+  .act-ChangePassword { background:#fce8e8; color:#6b1a1a; }
+  .act-SendChat       { background:#e8daef; color:#4a235a; }
+  .act-DeleteChat     { background:#f8d7da; color:#842029; }
+</style>
+
+<div class="row">
+    <div class="12u">
+        <h2>Activity Logs</h2>
+    </div>
+    <div class="12u">
+        <table>
+            <tr>
+                <td align="center"><strong>User</strong></td>
+                <td align="center"><strong>Activity</strong></td>
+                <td align="center"><strong>IP Address</strong></td>
+                <td align="center"><strong>Date</strong></td>
+                <td align="center"><strong>User Agent</strong></td>
+                <td align="center"><strong>Description</strong></td>
+            </tr>
+            {% for activity_log in object_list %}
+                <tr>
+                    <td align="center">{{ activity_log.user }}</td>
+                    <td align="center">
+                        <span class="act-badge act-{{ activity_log.activity_log }}">
+                            {{ activity_log.activity_log }}
+                        </span>
+                    </td>
+                    <td align="center">{{ activity_log.ip_address }}</td>
+                    <td align="center">{{ activity_log.date_created }}</td>
+                    <td align="center" style="font-size:11px;">{{ activity_log.user_agent }}</td>
+                    <td align="center">{{ activity_log.description }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">No activity log available.</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

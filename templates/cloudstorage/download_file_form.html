@@ -1,0 +1,87 @@
+{% extends "inner_base.html" %}
+{% load static %}
+{% block content %}
+<style>
+  .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:12px; font-weight:bold; }
+  .badge-low    { background:#c8f7c5; color:#1e6b1e; }
+  .badge-medium { background:#fef3cd; color:#856404; }
+  .badge-high   { background:#f8d7da; color:#842029; }
+  .step-up-box  { background:#fff3cd; border:1px solid #ffc107; padding:10px; margin:10px 0; border-radius:4px; max-width:480px; }
+  .expired-box  { background:#f8d7da; border:1px solid #dc3545; padding:10px; margin:10px 0; border-radius:4px; max-width:480px; }
+  .confirm-overlay {
+    position: fixed; inset: 0; background: rgba(11, 18, 32, 0.68);
+    display: none; align-items: center; justify-content: center; z-index: 9999;
+    padding: 20px;
+  }
+  .confirm-modal {
+    width: 100%; max-width: 520px; background: #fff; border-radius: 12px;
+    padding: 22px 24px; box-shadow: 0 18px 48px rgba(0,0,0,.25);
+  }
+  .confirm-modal h3 { margin-top: 0; }
+  .confirm-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .confirm-actions .button.secondary { background: #7f8c8d; }
+</style>
+<div class="row">
+  <div class="12u">
+    <h2>Download File</h2>
+  </div>
+  <div class="12u">
+
+    {% if sensitivity %}
+    <p>
+      <strong>Sensitivity:</strong>
+      <span class="badge badge-{{ sensitivity }}">{{ sensitivity|upper }}</span>
+      &nbsp;&nbsp;
+      <strong>Cipher:</strong> {{ cipher_used }}
+      {% if transfer_expires_at %}
+        &nbsp;&nbsp;
+        {% if transfer_expired %}
+          <span style="color:#842029;"><strong>&#9888; Share link EXPIRED</strong>
+            ({{ transfer_expires_at|date:"d M Y H:i" }} UTC)</span>
+        {% else %}
+          <span style="color:#856404;">&#128336; Expires {{ transfer_expires_at|date:"d M Y H:i" }} UTC</span>
+        {% endif %}
+      {% endif %}
+    </p>
+    {% endif %}
+
+    {% if transfer_expired %}
+    <div class="expired-box">
+      <strong>&#9888; This link has expired.</strong><br/>
+      {{ errors }}
+    </div>
+    {% else %}
+
+    <form action="" method="post" id="download-form">{% csrf_token %}
+
+      {% if errors %}
+      <p style="color:#842029; font-weight:bold;">&#9888; {{ errors }}</p>
+      {% endif %}
+
+      {% if require_step_up %}
+      <div class="step-up-box">
+        <strong>&#9888; High-Sensitivity File</strong><br/>
+        This file is encrypted with AES-256-GCM. Ensure you are authorised to access it.
+      </div>
+      {% endif %}
+
+      <p>
+        <label for="id_file_password"><strong>File Password</strong></label><br/>
+        <input type="password" name="file_password" id="id_file_password"
+               placeholder="Enter the file password"
+               minlength="8" maxlength="64"
+               style="width:380px; margin-top:5px;"/>
+      </p>
+      <p style="font-size:12px; color:#555; margin-top:-8px;">
+        &#128273; ECC key-unwrapping and AES-GCM decryption happen automatically after your password is verified.
+      </p>
+
+      <input type="submit" value="Decrypt &amp; Download" class="button"/>
+    </form>
+
+    <!-- Removed confirm overlay/modal — direct decrypt & download on submit -->
+
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "inner_base.html" %}
+{% load static %}
+{% block content %}
+<style>
+  .info-box  { padding:14px 16px; border-radius:6px; border:1px solid; margin:14px 0; max-width:720px; }
+  .info-box.success { background:#d4edda; border-color:#28a745; color:#155724; }
+  .info-box.warning { background:#fff3cd; border-color:#ffc107; color:#856404; }
+  .info-box.info    { background:#d1ecf1; border-color:#17a2b8; color:#0c5460; }
+  .badge-ecc { display:inline-block; padding:2px 10px; border-radius:10px;
+               background:#cce5ff; color:#004085; font-size:12px; font-weight:bold; }
+  .step-list { max-width:720px; }
+  .step-list li { margin-bottom:8px; line-height:1.7; }
+</style>
+
+<div class="row">
+  <div class="12u">
+    <h2>ECC Key Management</h2>
+    <p>
+      <span class="badge-ecc">SECP256R1 &mdash; Elliptic Curve Cryptography</span>
+    </p>
+  </div>
+
+  <div class="12u">
+
+    {% if generated %}
+    {# Key pair was regenerated #}
+    <div class="info-box success">
+      <strong>&#10003; ECC Key Pair Regenerated</strong><br/>
+      A new SECP256R1 key pair has been generated and stored. Your public key has been
+      updated. New file uploads will use this key pair automatically.<br/><br/>
+      <strong>Note:</strong> Files uploaded under the <em>previous</em> key pair will still
+      decrypt correctly as long as that key pair remains in the database (which it does —
+      regenerating replaces the stored keys, so old files are now inaccessible unless you
+      restore the old keys). Only regenerate if you intend to start fresh.
+    </div>
+
+    {% elif has_key %}
+    {# User already has an auto-generated key pair #}
+    <div class="info-box success">
+      <strong>&#10003; ECC Key Pair Active</strong><br/>
+      Your SECP256R1 key pair is on file. Every file you upload is automatically encrypted
+      using your ECC public key. Decryption at download time uses your stored private key
+      &mdash; no manual key input needed.
+    </div>
+
+    {% else %}
+    {# No keys yet — first upload will trigger auto-generation #}
+    <div class="info-box info">
+      <strong>&#128273; ECC Keys Not Yet Generated</strong><br/>
+      Your ECC key pair will be generated <strong>automatically</strong> on your first file
+      upload. There is nothing you need to do here. You can also manually trigger generation
+      using the button below.
+    </div>
+    {% endif %}
+
+    <div class="info-box info" style="margin-top:6px;">
+      <strong>How the dual-layer encryption works</strong>
+      <ol class="step-list">
+        <li><strong>Upload:</strong> A random Data Encryption Key (DEK) is generated per file.
+            The file is encrypted with AES-GCM using that DEK. The DEK is then <em>wrapped</em>
+            (encrypted) with your ECC public key via ECIES and stored.</li>
+        <li><strong>Your password:</strong> A PBKDF2-SHA256 hash of your per-file password is
+            stored. At download time it acts as the gate &mdash; the ECC unwrap only runs after
+            the password is verified.</li>
+        <li><strong>Download:</strong> You enter your file password. The server verifies the hash,
+            then uses your stored ECC private key to unwrap the DEK, and finally
+            decrypts the file with AES-GCM. You never have to paste keys.</li>
+      </ol>
+    </div>
+
+    {% if has_key or generated %}
+    <div class="info-box warning" style="margin-top:4px;">
+      <strong>&#9888; Regenerating Keys</strong><br/>
+      Regenerating replaces the stored private key. Files encrypted under the old key pair
+      will <strong>no longer be decryptable</strong> unless the old key pair is restored.
+      Only regenerate if you have a specific reason to do so.
+    </div>
+    <form method="post" action="">
+      {% csrf_token %}
+      <button type="submit" class="button"
+              onclick="return confirm('Replace the current ECC key pair? Old files will become inaccessible. Continue?');">
+        Regenerate Key Pair
+      </button>
+    </form>
+    {% else %}
+    <form method="post" action="">
+      {% csrf_token %}
+      <button type="submit" class="button">Generate ECC Key Pair Now</button>
+    </form>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

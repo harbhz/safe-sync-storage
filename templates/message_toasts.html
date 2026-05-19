@@ -1,0 +1,71 @@
+{% if messages %}
+<div class="toast-stack" aria-live="polite" aria-atomic="true">
+  {% for message in messages %}
+    <div class="toast-message toast-{{ message.tags|default:'info' }}">{{ message }}</div>
+  {% endfor %}
+</div>
+<style>
+  .toast-stack {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: min(92vw, 420px);
+    pointer-events: none;
+  }
+  .toast-message {
+    pointer-events: auto;
+    padding: 12px 14px;
+    border-radius: 10px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+    border: 1px solid transparent;
+    font-size: 14px;
+    line-height: 1.35;
+    animation: toast-in 180ms ease-out;
+  }
+  .toast-error {
+    background: #f8d7da;
+    border-color: #dc3545;
+    color: #842029;
+  }
+  .toast-warning {
+    background: #fff3cd;
+    border-color: #ffc107;
+    color: #856404;
+  }
+  .toast-success {
+    background: #d1e7dd;
+    border-color: #198754;
+    color: #0f5132;
+  }
+  .toast-info {
+    background: #cff4fc;
+    border-color: #0dcaf0;
+    color: #055160;
+  }
+  @keyframes toast-in {
+    from { transform: translateY(8px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+</style>
+<script>
+  (function () {
+    var toasts = document.querySelectorAll('.toast-message');
+    toasts.forEach(function (toast) {
+      window.setTimeout(function () {
+        toast.style.transition = 'opacity 220ms ease, transform 220ms ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        window.setTimeout(function () {
+          if (toast && toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        }, 240);
+      }, 3800);
+    });
+  })();
+</script>
+{% endif %}

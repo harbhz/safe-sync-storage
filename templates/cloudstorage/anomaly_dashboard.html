@@ -1,0 +1,113 @@
+{% extends "inner_base.html" %}
+{% load static %}
+{% block content %}
+<style>
+  .dash-wrap { max-width: 1100px; }
+  .dash-note { background:#eef6ff; border:1px solid #b9d6f2; color:#164567; padding:12px 14px; border-radius:6px; margin:12px 0 18px; }
+  .dash-cards { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px; }
+  .dash-card { flex:1; min-width:180px; padding:14px 16px; border-radius:8px; border:1px solid #d9e2ef; background:#fff; }
+  .dash-card .num { font-size:30px; font-weight:bold; line-height:1.1; }
+  .dash-card .lbl { font-size:12px; color:#666; margin-top:4px; }
+  .dash-card.low { background:#f3fbf3; }
+  .dash-card.medium { background:#fffaf0; }
+  .dash-card.high { background:#fff2f2; }
+  .dash-grid { display:grid; grid-template-columns: 1.3fr .9fr; gap:18px; }
+  .dash-box { border:1px solid #d9e2ef; border-radius:8px; background:#fff; padding:14px 16px; }
+  .dash-box h3 { margin-top:0; }
+  .dash-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .dash-table th, .dash-table td { border:1px solid #e4e9f2; padding:8px 10px; vertical-align:top; }
+  .dash-table th { background:#f7f9fc; text-align:left; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold; }
+  .badge-low { background:#c8f7c5; color:#1e6b1e; }
+  .badge-medium { background:#fef3cd; color:#856404; }
+  .badge-high { background:#f8d7da; color:#842029; }
+  .action-list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.8; }
+  .mini { font-size: 12px; color: #666; }
+  @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="row dash-wrap">
+  <div class="12u">
+    <h2>Anomaly Dashboard</h2>
+    <p class="mini">This page shows the detections that cause step-up authentication, shortened sharing windows, and AES-256 escalation.</p>
+
+    <div class="dash-note">
+      <strong>How to notice the change:</strong> upload a file, attempt a transfer, or log in with repeated failures. If the engine flags the session, you will see a warning banner, a lock icon on the file list, AES-256 in the file record, and a shorter share expiry.
+    </div>
+
+    <div class="dash-cards">
+      <div class="dash-card low">
+        <div class="num">{{ anomaly_counts.low }}</div>
+        <div class="lbl">Low severity events</div>
+      </div>
+      <div class="dash-card medium">
+        <div class="num">{{ anomaly_counts.medium }}</div>
+        <div class="lbl">Medium severity events</div>
+      </div>
+      <div class="dash-card high">
+        <div class="num">{{ anomaly_counts.high }}</div>
+        <div class="lbl">High severity events</div>
+      </div>
+      <div class="dash-card">
+        <div class="num">{{ step_up_required }}</div>
+        <div class="lbl">Files requiring step-up</div>
+      </div>
+      <div class="dash-card">
+        <div class="num">{{ forced_aes256 }}</div>
+        <div class="lbl">AES-256 protected files</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-box">
+        <h3>Recent Anomaly Events</h3>
+        <table class="dash-table">
+          <tr>
+            <th>Time</th>
+            <th>Type</th>
+            <th>Score</th>
+            <th>Action</th>
+          </tr>
+          {% for event in recent_events %}
+          <tr>
+            <td>{{ event.date_created }}</td>
+            <td><span class="badge badge-{{ event.severity }}">{{ event.event_type|upper }}</span></td>
+            <td>{{ event.anomaly_score|floatformat:2 }}</td>
+            <td>{{ event.action_taken }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4">No anomaly events yet.</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <div class="dash-box">
+        <h3>What Users Notice</h3>
+        <ol class="action-list">
+          <li>Login failures start adding up and a warning banner appears on the next action.</li>
+          <li>Uploads with suspicious risk or file type show a locked/step-up indicator in file lists.</li>
+          <li>High-risk transfers are blocked or shortened automatically.</li>
+          <li>Downloads display the cipher used and warn when step-up auth is required.</li>
+          <li>Admins can inspect all anomaly events in the Django admin and here in the dashboard.</li>
+        </ol>
+
+        <h3 style="margin-top:18px;">Recent Activity</h3>
+        <table class="dash-table">
+          <tr>
+            <th>Activity</th>
+            <th>Detail</th>
+          </tr>
+          {% for log in recent_logs %}
+          <tr>
+            <td>{{ log.activity_log }}</td>
+            <td>{{ log.description|default:"No description" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="2">No recent activity yet.</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

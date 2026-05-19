@@ -1,0 +1,184 @@
+{% extends "inner_base.html" %}
+{% load static %}
+{% block content %}
+<style>
+  .field-label { font-weight:bold; display:block; margin-bottom:4px; margin-top:12px; }
+  .field-input  { width:100%; max-width:480px; padding:6px 8px; box-sizing:border-box; }
+  .info-box  { padding:10px 14px; border-radius:5px; border:1px solid; max-width:480px; margin-top:12px; display:none; }
+  .info-box.blocked { background:#f8d7da; border-color:#dc3545; color:#842029; }
+  .info-box.allowed { background:#d4edda; border-color:#28a745; color:#155724; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold; }
+  .badge-low    { background:#c8f7c5; color:#1e6b1e; }
+  .badge-medium { background:#fef3cd; color:#856404; }
+  .badge-high   { background:#f8d7da; color:#842029; }
+  .errorlist, .error-msg { color:red; font-size:13px; margin:8px 0; }
+  .confirm-overlay {
+    position: fixed; inset: 0; background: rgba(11, 18, 32, 0.68);
+    display: none; align-items: center; justify-content: center; z-index: 9999;
+    padding: 20px;
+  }
+  .confirm-modal {
+    width: 100%; max-width: 540px; background: #fff; border-radius: 12px;
+    padding: 22px 24px; box-shadow: 0 18px 48px rgba(0,0,0,.25);
+  }
+  .confirm-modal h3 { margin-top: 0; }
+  .confirm-actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .confirm-actions .button.secondary { background: #7f8c8d; }
+  .confirm-summary { font-size: 13px; color: #444; line-height: 1.7; }
+</style>
+
+<div class="row">
+  <div class="10u">
+    <h2>Transfer File</h2>
+  </div>
+  <div class="2u">
+    <a href="/filetransfer_list/" class="button" style="float:right">Transfer Files List</a>
+  </div>
+  <div class="12u" style="min-height:400px;">
+    {% if errors %}
+      <p class="error-msg">{{ errors }}</p>
+    {% endif %}
+
+    <form method="post" action="" id="transfer-form">
+      {% csrf_token %}
+      <input type="hidden" name="confirmed" id="transfer-confirmed" value="0" />
+
+      <label class="field-label" for="file_id">File Name</label>
+      <select name="file_id" required id="file_id" class="field-input">
+        <option value="" data-sensitivity="">---------</option>
+        {% for file_data in file_list %}
+          <option value="{{ file_data.id }}"
+                  data-sensitivity="{{ file_data.sensitivity }}">
+            {{ file_data.file_name }}
+            ({{ file_data.sensitivity|upper }})
+          </option>
+        {% endfor %}
+      </select>
+
+      {# Live policy preview #}
+      <div id="policy-box" class="info-box">
+        <strong id="policy-title"></strong><br/>
+        <span id="policy-detail"></span>
+      </div>
+
+      <label class="field-label" for="remarks">Remarks</label>
+      <input type="text" name="remarks" id="remarks"
+             class="field-input" maxlength="250" required/>
+
+      <label class="field-label" for="receiver_id">Receiver</label>
+      <select name="receiver_id" id="receiver_id" class="field-input" required>
+        <option value="">— Select a user —</option>
+        {% for u in user_list %}
+          <option value="{{ u.id }}">{{ u.get_full_name|default:u.username }} ({{ u.username }})</option>
+        {% endfor %}
+      </select>
+
+      <br/>
+      <button type="submit" class="button" id="submit-btn">Transfer File</button>
+    </form>
+
+    <div class="confirm-overlay" id="transfer-confirm-overlay" aria-hidden="true">
+      <div class="confirm-modal">
+        <h3>Confirm Transfer</h3>
+        <p>Review the share details before the file is sent.</p>
+        <div class="confirm-summary" id="transfer-summary"></div>
+        <div class="confirm-actions">
+          <button type="button" class="button secondary" id="transfer-confirm-cancel">Cancel</button>
+          <button type="button" class="button" id="transfer-confirm-accept">Confirm &amp; Transfer</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var POLICY = {
+          high:   { blocked: true,  hours: 12, label: '12 hours' },
+          medium: { blocked: false, hours: 48, label: '48 hours' },
+          low:    { blocked: false, hours: 72, label: '72 hours' },
+        };
+
+        var select    = document.getElementById('file_id');
+        var box       = document.getElementById('policy-box');
+        var titleEl   = document.getElementById('policy-title');
+        var detailEl  = document.getElementById('policy-detail');
+        var submitBtn = document.getElementById('submit-btn');
+        var form = document.getElementById('transfer-form');
+        var overlay = document.getElementById('transfer-confirm-overlay');
+        var transferConfirmed = document.getElementById('transfer-confirmed');
+        var cancelBtn = document.getElementById('transfer-confirm-cancel');
+        var acceptBtn = document.getElementById('transfer-confirm-accept');
+        var summary = document.getElementById('transfer-summary');
+        var remarks = document.getElementById('remarks');
+        var receiver = document.getElementById('receiver_id');
+        var pendingSubmit = false;
+
+        function selectedText(selectEl) {
+          var opt = selectEl.options[selectEl.selectedIndex];
+          return opt ? opt.textContent : '';
+        }
+
+        function openModal() {
+          var fileText = selectedText(select);
+          var receiverText = selectedText(receiver);
+          summary.innerHTML =
+            '<strong>File:</strong> ' + (fileText || 'Not selected') + '<br/>' +
+            '<strong>Receiver:</strong> ' + (receiverText || 'Not selected') + '<br/>' +
+            '<strong>Remarks:</strong> ' + (remarks.value || 'No remarks') + '<br/>' +
+            '<strong>Warning:</strong> This action creates a share link and writes an audit trail.';
+          overlay.style.display = 'flex';
+          overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeModal() {
+          overlay.style.display = 'none';
+          overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        select.addEventListener('change', function () {
+          var opt = this.options[this.selectedIndex];
+          var sens = opt.getAttribute('data-sensitivity');
+          if (!sens) { box.style.display = 'none'; submitBtn.disabled = false; return; }
+
+          var p = POLICY[sens] || POLICY['medium'];
+          box.style.display = 'block';
+          if (p.blocked) {
+            box.className = 'info-box blocked';
+            titleEl.textContent  = '\u26D4 Cannot Share — HIGH Sensitivity';
+            detailEl.textContent = 'High-sensitivity files cannot be transferred (allow_public_link = False).';
+            submitBtn.disabled = true;
+          } else {
+            box.className = 'info-box allowed';
+            titleEl.textContent  = '\u2713 Transfer Allowed';
+            detailEl.textContent = 'This share link will expire in ' + p.label + '.';
+            submitBtn.disabled = false;
+          }
+        });
+
+        form.addEventListener('submit', function (event) {
+          if (transferConfirmed.value === '1') { return; }
+          if (submitBtn.disabled) { return; }
+          event.preventDefault();
+          openModal();
+        });
+
+        cancelBtn.addEventListener('click', function () {
+          transferConfirmed.value = '0';
+          closeModal();
+        });
+
+        acceptBtn.addEventListener('click', function () {
+          transferConfirmed.value = '1';
+          closeModal();
+          form.submit();
+        });
+
+        overlay.addEventListener('click', function (event) {
+          if (event.target === overlay) {
+            closeModal();
+          }
+        });
+      })();
+    </script>
+  </div>
+</div>
+{% endblock %}

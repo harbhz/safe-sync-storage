@@ -1,0 +1,10 @@
+asgiref==3.7.2
+cryptography
+Django>=4.2,<5.3
+django-widget-tweaks==1.5.0
+django-stubs
+sqlparse==0.4.4
+typing_extensions==4.8.0
+python-dotenv
+filetype
+# pyotp removed — security-question verification used instead

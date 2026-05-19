@@ -1,0 +1,49 @@
+# Uploads & Media
+upload/
+media/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+safesync/
+.venv/
+*.egg-info/
+dist/
+build/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Django
+*.log
+db.sqlite3
+staticfiles/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE & Editors
+.vscode/
+.idea/
+pyrightconfig.json
+*.swp
+*.swo
+*~
+
+# Archives & Backups
+*.zip
+*.tar.gz
+*.tar
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+.python-version

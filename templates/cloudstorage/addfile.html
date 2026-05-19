@@ -1,0 +1,117 @@
+{% extends "inner_base.html" %}
+{% load static %}
+{% block content %}
+<style>
+  .field-label { font-weight:bold; display:block; margin-bottom:4px; margin-top:16px; }
+  .field-input  { width:100%; max-width:480px; padding:6px 8px; box-sizing:border-box; }
+  .hint         { font-size:12px; color:#666; margin-top:3px; }
+  .errorlist    { color:red; font-size:13px; list-style:none; padding:0; margin:4px 0; }
+
+  /* Adaptive engine info panel */
+  .adaptive-panel {
+    max-width: 480px; margin-top: 20px; border-radius: 6px;
+    border: 1px solid #b0cce4; background: #eaf4fb; padding: 14px 16px;
+    font-size: 12px; color: #1a3c5e;
+  }
+  .adaptive-panel .ap-title {
+    font-weight: bold; font-size: 13px; margin-bottom: 10px;
+  }
+  .ap-row {
+    display: flex; gap: 8px; align-items: flex-start; margin-bottom: 7px;
+  }
+  .ap-icon  { font-size: 15px; flex-shrink: 0; width: 20px; text-align: center; }
+  .ap-text  { line-height: 1.5; }
+  .ap-badge {
+    display: inline-block; border-radius: 3px; padding: 1px 7px;
+    font-size: 11px; font-weight: bold; margin-left: 4px;
+    background: #c8e6f9; color: #0a4a7c;
+  }
+</style>
+
+<div class="row">
+  <div class="10u">
+    <h2>Upload File</h2>
+  </div>
+  <div class="2u">
+    <a href="/filelist/" class="button" style="float:right">Upload Files List</a>
+  </div>
+  <div class="12u" style="min-height:400px;">
+    <form method="post" action="" enctype="multipart/form-data" id="upload-form">
+      {% csrf_token %}
+
+      {# File Name #}
+      <label class="field-label" for="id_file_name">File Name</label>
+      {{ form.file_name.errors }}
+      <input class="field-input" type="text" name="file_name" id="id_file_name"
+             maxlength="100" required value="{{ form.file_name.value|default:'' }}"/>
+
+      {# File #}
+      <label class="field-label" for="id_file_path">File</label>
+      {{ form.file_path.errors }}
+      <input class="field-input" type="file" name="file_path" id="id_file_path" required/>
+
+      {# Password (per-file access credential) #}
+      <label class="field-label" for="id_file_password">File Password</label>
+      {{ form.file_password.errors }}
+      <input class="field-input" type="password" name="file_password" id="id_file_password"
+             minlength="8" maxlength="64" required
+             placeholder="8–64 characters"/>
+      <p class="hint">Required at download time to authenticate access. 8–64 characters.</p>
+
+      <!-- Adaptive engine info -->
+      <div class="adaptive-panel">
+        <div class="ap-title">&#129302; Adaptive Cryptographic Engine</div>
+
+        <div class="ap-row">
+          <span class="ap-icon">&#128196;</span>
+          <div class="ap-text">
+            <strong>File type</strong> &mdash; extension classified as
+            <span class="ap-badge">LOW</span>
+            <span class="ap-badge">MEDIUM</span> or
+            <span class="ap-badge">HIGH</span> sensitivity automatically.
+          </div>
+        </div>
+
+        <div class="ap-row">
+          <span class="ap-icon">&#128190;</span>
+          <div class="ap-text">
+            <strong>File size</strong> &mdash; tiny files (&le;&thinsp;512&nbsp;B) are
+            encrypted directly via <strong>ECIES</strong> with no separate AES step.
+            Larger files use <strong>AES-128-GCM</strong> or <strong>AES-256-GCM</strong>.
+          </div>
+        </div>
+
+        <div class="ap-row">
+          <span class="ap-icon">&#128100;</span>
+          <div class="ap-text">
+            <strong>User risk score</strong> &mdash; account age, recent activity
+            burst, and sharing breadth are combined into a 0.0&ndash;1.0 score.
+            High scores escalate the cipher to AES-256.
+          </div>
+        </div>
+
+        <div class="ap-row">
+          <span class="ap-icon">&#128241;</span>
+          <div class="ap-text">
+            <strong>Device context</strong> &mdash; mobile clients always receive
+            AES-256-GCM regardless of file size or sensitivity.
+          </div>
+        </div>
+
+        <div class="ap-row" style="margin-bottom:0;">
+          <span class="ap-icon">&#128273;</span>
+          <div class="ap-text">
+            The selected cipher,
+            <strong>ECC key-wrapping</strong> (ECIES / SECP256R1), and your
+            <strong>password gate</strong> (PBKDF2-SHA256) are applied
+            automatically &mdash; no manual selection needed.
+          </div>
+        </div>
+      </div>
+
+      <br/>
+      <button type="submit" class="button">Upload &amp; Encrypt</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

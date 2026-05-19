@@ -1,0 +1,42 @@
+{% extends "inner_base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="row">
+    <div class="12u">
+        <h2>Chat</h2>
+    </div>
+    <div class="12u">
+        <form method="post" action="">
+           {% csrf_token %}
+           {{ form.as_p }}
+           <button type="submit" class="button">Submit</button>
+       </form>
+    </div>
+    <div class="12u">
+        <table>
+            <tr>
+                <td align="center"><strong>From</strong></td>
+                <td align="center"><strong>Message</strong></td>
+                <td align="center"><strong>To</strong></td>
+                <td align="center"><strong>Date Time</strong></td>
+                <td align="center"><strong>Delete</strong></td>
+            </tr>
+            {% for chat in object_list %}
+                <tr>
+                    <td align="center">{{ chat.sender_user}}</td>
+                    <td align="center">{{ chat.message}}</td>
+                    <td align="center">{{ chat.receiver_user}}</td>
+                    <td align="center">{{ chat.date_created}}</td>
+                    <td align="center"><a href="/deletechat/?id={{ chat.id}}" class="button" style="height: 34px;font-size: 12px;background: firebrick;">Delete</a></td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No transfer file available.</td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
