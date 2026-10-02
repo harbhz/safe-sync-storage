@@ -90,6 +90,17 @@ Execute the automated test suite with:
 python manage.py test
 ```
 
+## Deploying to Render
+
+The repository includes [render.yaml](render.yaml) for a Render web service and
+PostgreSQL database. Create a Blueprint from the repository, then set
+`ALLOWED_HOSTS` to the Render hostname and `CSRF_TRUSTED_ORIGINS` to its HTTPS
+origin, for example `https://safe-sync-storage.onrender.com`.
+
+The web service runs migrations and collects static files during the build. Its
+start command uses Gunicorn, and uploaded files are stored as encrypted database
+content rather than on Render's ephemeral filesystem.
+
 ---
 
 ## Production Security Checklist
